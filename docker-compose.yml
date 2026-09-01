@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-ssl
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/tls:ro
+    depends_on:
+      - vaultwarden
+    networks:
+      - app-network
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      DOMAIN: "YOUR_LOCAL_DOMAIN"
+      WEBSOCKET_ENABLED: "true"
+      SIGNUPS_ALLOWED: "false"
+    volumes:
+      - ./vw-data:/data
+    expose:
+      - "80"
+      - "3012"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
